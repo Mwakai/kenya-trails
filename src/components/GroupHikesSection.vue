@@ -207,8 +207,8 @@ const filteredHikes = computed(() => {
 
 <style scoped>
 .group-hikes-section {
-  background: #f3f4f6;
-  padding: 60px 20px;
+  background: var(--color-bg-secondary);
+  padding: var(--space-16) var(--space-5);
   min-height: 100%;
   box-sizing: border-box;
 }
@@ -220,141 +220,146 @@ const filteredHikes = computed(() => {
 
 .section-header {
   text-align: center;
-  margin-bottom: 40px;
+  margin-bottom: var(--space-10);
 }
 
 .section-header h2 {
-  font-size: 32px;
-  font-weight: 700;
-  color: #1f2937;
-  margin: 0 0 12px 0;
+  font-size: var(--text-3xl);
+  font-weight: var(--font-bold);
+  color: var(--color-gray-800);
+  margin: 0 0 var(--space-3) 0;
+  line-height: var(--leading-tight);
 }
 
 .section-header p {
-  font-size: 16px;
-  color: #6b7280;
+  font-size: var(--text-base);
+  color: var(--color-gray-500);
   margin: 0;
+  line-height: var(--leading-normal);
 }
 
 .search-bar {
-  margin-bottom: 24px;
+  margin-bottom: var(--space-6);
 }
 
 .search-input {
   width: 100%;
-  padding: 14px 20px;
-  border: 2px solid #e5e7eb;
-  background: white;
-  border-radius: 10px;
-  font-size: 16px;
-  color: #1f2937;
-  transition: border-color 0.2s ease, box-shadow 0.2s ease;
+  padding: var(--space-3) var(--space-5);
+  border: 2px solid var(--color-gray-200);
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-base);
+  color: var(--color-gray-800);
+  transition: border-color var(--duration-fast) var(--ease-out),
+    box-shadow var(--duration-fast) var(--ease-out);
   box-sizing: border-box;
 }
 
 .search-input::placeholder {
-  color: #9ca3af;
+  color: var(--color-gray-400);
 }
 
 .search-input:hover {
-  border-color: #d1d5db;
+  border-color: var(--color-gray-300);
 }
 
 .search-input:focus {
-  border-color: #10b981;
+  border-color: var(--color-primary);
   outline: none;
-  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.1);
+  box-shadow: 0 0 0 3px var(--color-primary-light);
 }
 
 .controls {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 24px;
-  margin-bottom: 32px;
+  gap: var(--space-6);
+  margin-bottom: var(--space-8);
   flex-wrap: wrap;
 }
 
 .filters {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
   flex-wrap: wrap;
 }
 
 .control-label {
-  font-size: 14px;
-  font-weight: 500;
-  color: #4b5563;
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-gray-600);
 }
 
 .sort {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: var(--space-3);
 }
 
 .sort-select {
-  padding: 10px 16px;
-  border: 2px solid #e5e7eb;
-  background: white;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #4b5563;
+  padding: var(--space-2) var(--space-4);
+  border: 2px solid var(--color-gray-200);
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-gray-600);
   cursor: pointer;
-  transition: border-color 0.2s ease;
+  transition: border-color var(--duration-fast) var(--ease-out);
 }
 
 .sort-select:hover,
 .sort-select:focus {
-  border-color: #10b981;
+  border-color: var(--color-primary);
   outline: none;
 }
 
 .filter-btn {
-  padding: 10px 20px;
-  border: 2px solid #e5e7eb;
-  background: white;
-  border-radius: 8px;
-  font-size: 14px;
-  font-weight: 500;
-  color: #4b5563;
+  padding: var(--space-2) var(--space-5);
+  border: 2px solid var(--color-gray-200);
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  color: var(--color-gray-600);
   cursor: pointer;
-  transition: all 0.2s ease;
+  transition: border-color var(--duration-fast) var(--ease-out),
+    color var(--duration-fast) var(--ease-out),
+    background var(--duration-fast) var(--ease-out);
 }
 
 .filter-btn:hover {
-  border-color: #10b981;
-  color: #10b981;
+  border-color: var(--color-primary);
+  color: var(--color-primary);
 }
 
 .filter-btn.active {
-  background: #10b981;
-  border-color: #10b981;
+  background: var(--color-primary);
+  border-color: var(--color-primary);
   color: white;
 }
 
 .no-results {
   text-align: center;
-  color: #6b7280;
-  font-size: 16px;
-  padding: 40px 0;
+  color: var(--color-gray-500);
+  font-size: var(--text-base);
+  padding: var(--space-10) 0;
 }
 
 .hikes-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: 24px;
+  gap: var(--space-6);
 }
 
 @media (max-width: 768px) {
   .group-hikes-section {
-    padding: 40px 16px;
+    padding: var(--space-10) var(--space-4);
   }
 
   .section-header h2 {
-    font-size: 24px;
+    font-size: var(--text-2xl);
   }
 
   .hikes-grid {

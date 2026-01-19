@@ -93,11 +93,91 @@ onMounted(() => {
     'top-right',
   )
 
-  // Wait for map to load before adding markers
+  // Wait for map to load before adding markers and mask
   map.on('load', () => {
+    addKenyaMask()
     addTrailMarkers()
   })
 })
+
+const addKenyaMask = async () => {
+  if (!map) return
+
+  try {
+    // Fetch Kenya boundary from OSM-derived GeoJSON
+    const response = await fetch(
+      'https://nominatim.openstreetmap.org/search?country=Kenya&polygon_geojson=1&format=json',
+    )
+    const data = await response.json()
+
+    if (!data[0]?.geojson) {
+      return
+    }
+
+    const kenyaGeometry = data[0].geojson
+
+    // World bounds (large rectangle)
+    const worldBounds = [
+      [-180, -90],
+      [-180, 90],
+      [180, 90],
+      [180, -90],
+      [-180, -90],
+    ]
+
+    // Get Kenya coordinates (handle both Polygon and MultiPolygon)
+    const kenyaCoords =
+      kenyaGeometry.type === 'MultiPolygon'
+        ? kenyaGeometry.coordinates[0][0]
+        : kenyaGeometry.coordinates[0]
+
+    // Create mask polygon (world with Kenya hole)
+    map.addSource('kenya-mask', {
+      type: 'geojson',
+      data: {
+        type: 'Feature',
+        properties: {},
+        geometry: {
+          type: 'Polygon',
+          coordinates: [worldBounds, kenyaCoords],
+        },
+      },
+    })
+
+    map.addLayer({
+      id: 'kenya-mask-layer',
+      type: 'fill',
+      source: 'kenya-mask',
+      paint: {
+        'fill-color': '#1f2937',
+        'fill-opacity': 0.6,
+      },
+    })
+
+    // Add Kenya border highlight
+    map.addSource('kenya-border', {
+      type: 'geojson',
+      data: {
+        type: 'Feature',
+        properties: {},
+        geometry: kenyaGeometry,
+      },
+    })
+
+    map.addLayer({
+      id: 'kenya-border-layer',
+      type: 'line',
+      source: 'kenya-border',
+      paint: {
+        'line-color': '#10b981',
+        'line-width': 2.5,
+        'line-opacity': 1,
+      },
+    })
+  } catch (error) {
+    console.error(error)
+  }
+}
 
 const addTrailMarkers = () => {
   if (!map) return
@@ -116,18 +196,18 @@ const addTrailMarkers = () => {
     const popupContent = `
       <div class="trail-popup">
         <h3 style="margin: 0 0 8px 0; font-size: 16px; font-weight: 600;">${trail.name}</h3>
-        <div style="display: flex; gap: 12px; margin-bottom: 8px;">
-          <span style="font-size: 14px;">📏 ${trail.distance}</span>
-          <span style="font-size: 14px;">⛰️ ${trail.elevation}</span>
+        <div style="display: flex; gap: 16px; margin-bottom: 8px; font-size: 14px; color: #4b5563;">
+          <span><strong>Distance:</strong> ${trail.distance}</span>
+          <span><strong>Elevation:</strong> ${trail.elevation}</span>
         </div>
-        <div style="margin-bottom: 10px;">
-          <span style="display: inline-block; padding: 4px 8px; background: ${getDifficultyColor(trail.difficulty)}; border-radius: 4px; font-size: 12px; color: white;">
+        <div style="margin-bottom: 12px;">
+          <span style="display: inline-block; padding: 4px 12px; background: ${getDifficultyColor(trail.difficulty)}; border-radius: 9999px; font-size: 12px; color: white; font-weight: 600;">
             ${trail.difficulty}
           </span>
         </div>
         <button
           onclick="window.viewTrailDetail(${trail.id})"
-          style="width: 100%; padding: 8px; background: #10b981; color: white; border: none; border-radius: 6px; cursor: pointer; font-weight: 500;"
+          style="width: 100%; padding: 10px; background: #10b981; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; font-size: 14px;"
         >
           View Details
         </button>
@@ -183,9 +263,12 @@ onUnmounted(() => {
 }
 
 /* Custom marker hover effect */
+:deep(.custom-marker) {
+  transition: transform var(--duration-normal) var(--ease-out);
+}
+
 :deep(.custom-marker:hover) {
   transform: scale(1.1);
-  transition: transform 0.2s ease;
 }
 </style>
 
@@ -193,8 +276,8 @@ onUnmounted(() => {
 /* Global styles for popups */
 .maplibregl-popup-content {
   padding: 16px;
-  border-radius: 12px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+  border-radius: 16px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12);
   min-width: 250px;
 }
 
@@ -205,8 +288,11 @@ onUnmounted(() => {
   height: 24px;
 }
 
+.trail-popup button {
+  transition: background 150ms cubic-bezier(0.33, 1, 0.68, 1);
+}
+
 .trail-popup button:hover {
   background: #059669;
-  transition: background 0.2s ease;
 }
 </style>

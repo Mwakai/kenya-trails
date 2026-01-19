@@ -53,16 +53,16 @@ const formatPrice = (price: number): string => {
 
     <div class="hike-details">
       <div class="detail-row">
-        <span class="detail-icon">📍</span>
+        <span class="detail-label">Location:</span>
         <span>{{ hike.trail }}</span>
       </div>
       <div class="detail-row">
-        <span class="detail-icon">📅</span>
+        <span class="detail-label">Date:</span>
         <span>{{ hike.date }} at {{ hike.time }}</span>
       </div>
       <div class="detail-row">
-        <span class="detail-icon">👥</span>
-        <span>{{ hike.spotsLeft }} spots left of {{ hike.capacity }}</span>
+        <span class="detail-label">Spots:</span>
+        <span>{{ hike.spotsLeft }} left of {{ hike.capacity }}</span>
       </div>
     </div>
 
@@ -79,89 +79,93 @@ const formatPrice = (price: number): string => {
 
 <style scoped>
 .hike-card {
-  background: white;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  padding: var(--space-5);
+  box-shadow: var(--shadow-md);
+  transition: transform var(--duration-normal) var(--ease-out),
+    box-shadow var(--duration-normal) var(--ease-out);
 }
 
 .hike-card:hover {
-  transform: translateY(-4px);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+  transform: translateY(-3px);
+  box-shadow: var(--shadow-lg);
 }
 
 .card-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 12px;
+  margin-bottom: var(--space-3);
 }
 
 .organization {
   display: flex;
   align-items: center;
-  gap: 10px;
+  gap: var(--space-2);
 }
 
 .org-avatar {
   width: 36px;
   height: 36px;
-  border-radius: 50%;
-  background: linear-gradient(135deg, #10b981, #059669);
+  border-radius: var(--radius-full);
+  background: var(--color-primary);
   color: white;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-weight: 600;
-  font-size: 14px;
+  font-weight: var(--font-semibold);
+  font-size: var(--text-sm);
 }
 
 .org-name {
-  font-size: 14px;
-  color: #6b7280;
-  font-weight: 500;
+  font-size: var(--text-sm);
+  color: var(--color-gray-500);
+  font-weight: var(--font-medium);
 }
 
 .difficulty-badge {
-  padding: 4px 10px;
-  border-radius: 20px;
-  font-size: 12px;
-  font-weight: 600;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+  font-size: var(--text-xs);
+  font-weight: var(--font-semibold);
   color: white;
 }
 
 .hike-title {
-  margin: 0 0 16px 0;
-  font-size: 18px;
-  font-weight: 700;
-  color: #1f2937;
+  margin: 0 0 var(--space-4) 0;
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--color-gray-800);
+  line-height: var(--leading-tight);
 }
 
 .hike-details {
   display: flex;
   flex-direction: column;
-  gap: 8px;
-  margin-bottom: 16px;
+  gap: var(--space-2);
+  margin-bottom: var(--space-4);
 }
 
 .detail-row {
   display: flex;
   align-items: center;
-  gap: 8px;
-  font-size: 14px;
-  color: #4b5563;
+  gap: var(--space-2);
+  font-size: var(--text-sm);
+  color: var(--color-gray-600);
 }
 
-.detail-icon {
-  font-size: 16px;
+.detail-label {
+  font-weight: var(--font-medium);
+  color: var(--color-gray-500);
+  min-width: 60px;
 }
 
 .hike-description {
-  font-size: 14px;
-  color: #6b7280;
-  line-height: 1.5;
-  margin: 0 0 16px 0;
+  font-size: var(--text-sm);
+  color: var(--color-gray-500);
+  line-height: var(--leading-normal);
+  margin: 0 0 var(--space-4) 0;
   display: -webkit-box;
   -webkit-line-clamp: 2;
   -webkit-box-orient: vertical;
@@ -172,29 +176,29 @@ const formatPrice = (price: number): string => {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding-top: 16px;
-  border-top: 1px solid #e5e7eb;
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-gray-200);
 }
 
 .price {
-  font-size: 18px;
-  font-weight: 700;
-  color: #1f2937;
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--color-gray-800);
 }
 
 .signup-btn {
-  padding: 10px 24px;
-  background: #10b981;
+  padding: var(--space-2) var(--space-6);
+  background: var(--color-primary);
   color: white;
   border: none;
-  border-radius: 8px;
-  font-weight: 600;
-  font-size: 14px;
+  border-radius: var(--radius-md);
+  font-weight: var(--font-semibold);
+  font-size: var(--text-sm);
   text-decoration: none;
-  transition: background 0.2s ease;
+  transition: background var(--duration-fast) var(--ease-out);
 }
 
 .signup-btn:hover {
-  background: #059669;
+  background: var(--color-primary-hover);
 }
 </style>
