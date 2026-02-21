@@ -1,229 +1,144 @@
 <script setup lang="ts">
-import { ref, computed } from 'vue'
-import GroupHikeCard, { type GroupHike } from './GroupHikeCard.vue'
+import { onMounted } from 'vue'
+import { useRoute } from 'vue-router'
+import { useGroupHikeStore } from '@/stores/groupHikeStore'
+import GroupHikeCard from '@/components/GroupHikeCard.vue'
+import GroupHikeFilters from '@/components/group-hikes/GroupHikeFilters.vue'
 
-type DifficultyFilter = 'All' | 'Easy' | 'Moderate' | 'Hard'
-type SortOption = 'date' | 'price-low' | 'price-high'
+const route = useRoute()
+const store = useGroupHikeStore()
 
-const activeFilter = ref<DifficultyFilter>('All')
-const activeSort = ref<SortOption>('date')
-const searchQuery = ref('')
+onMounted(async () => {
+  store.syncFiltersFromUrl(route.query as Record<string, string>)
+  await Promise.all([store.fetchGroupHikes(), store.fetchFeatured(), store.fetchThisWeek()])
+})
 
-const difficultyFilters: DifficultyFilter[] = ['All', 'Easy', 'Moderate', 'Hard']
-
-const sortOptions: { value: SortOption; label: string }[] = [
-  { value: 'date', label: 'Date (Soonest)' },
-  { value: 'price-low', label: 'Price (Low to High)' },
-  { value: 'price-high', label: 'Price (High to Low)' },
-]
-
-// Sample data - replace with API call later
-const groupHikes: GroupHike[] = [
-  {
-    id: 1,
-    organization: 'Hiking Kenya',
-    title: 'Mount Longonot Sunrise Hike',
-    date: 'Sat, Feb 8, 2026',
-    time: '5:30 AM',
-    trail: 'Mount Longonot National Park',
-    difficulty: 'Moderate',
-    capacity: 30,
-    spotsLeft: 12,
-    price: 2500,
-    description:
-      'Experience a breathtaking sunrise from the rim of Mount Longonot crater. The hike includes a full crater rim walk with stunning views of the Rift Valley.',
-    signupUrl: '#',
-  },
-  {
-    id: 2,
-    organization: 'Nairobi Hikers',
-    title: 'Karura Forest Nature Walk',
-    date: 'Sun, Feb 9, 2026',
-    time: '7:00 AM',
-    trail: 'Karura Forest',
-    difficulty: 'Easy',
-    capacity: 25,
-    spotsLeft: 8,
-    price: 500,
-    description:
-      'A relaxing morning walk through the beautiful Karura Forest. Perfect for beginners and families. Includes a visit to the waterfall and caves.',
-    signupUrl: '#',
-  },
-  {
-    id: 3,
-    organization: 'Adventure Seekers KE',
-    title: "Hell's Gate Cycling & Gorge Walk",
-    date: 'Sat, Feb 15, 2026',
-    time: '6:00 AM',
-    trail: "Hell's Gate National Park",
-    difficulty: 'Moderate',
-    capacity: 20,
-    spotsLeft: 5,
-    price: 3500,
-    description:
-      "Cycle through the park with zebras and giraffes, then explore the dramatic gorge on foot. Bikes and guide included in the price.",
-    signupUrl: '#',
-  },
-  {
-    id: 4,
-    organization: 'Kenya Mountain Club',
-    title: 'Mount Kenya - Point Lenana',
-    date: 'Fri-Sun, Feb 21-23, 2026',
-    time: '6:00 AM',
-    trail: 'Mount Kenya (Sirimon Route)',
-    difficulty: 'Hard',
-    capacity: 15,
-    spotsLeft: 3,
-    price: 18000,
-    description:
-      "A 3-day expedition to Point Lenana (4,985m), the third highest peak of Mount Kenya. Includes accommodation, meals, guide, and porters.",
-    signupUrl: '#',
-  },
-  {
-    id: 5,
-    organization: 'Hiking Kenya',
-    title: 'Ngong Hills Traverse',
-    date: 'Sat, Feb 22, 2026',
-    time: '6:30 AM',
-    trail: 'Ngong Hills',
-    difficulty: 'Moderate',
-    capacity: 35,
-    spotsLeft: 20,
-    price: 1500,
-    description:
-      'Traverse all seven hills of the iconic Ngong Hills with panoramic views of the Rift Valley and Nairobi. A classic Kenya hiking experience.',
-    signupUrl: '#',
-  },
-  {
-    id: 6,
-    organization: 'Wild Trails Africa',
-    title: 'Aberdare Elephant Hill Hike',
-    date: 'Sun, Mar 1, 2026',
-    time: '5:00 AM',
-    trail: 'Aberdare National Park',
-    difficulty: 'Hard',
-    capacity: 12,
-    spotsLeft: 7,
-    price: 4500,
-    description:
-      'Challenge yourself with this demanding hike through the Aberdare moorlands. Chance to spot elephants, buffalos, and rare birdlife.',
-    signupUrl: '#',
-  },
-]
-
-const parseDate = (dateStr: string): Date => {
-  // Handle multi-day format like "Fri-Sun, Feb 21-23, 2026"
-  const cleanDate = dateStr.replace(/\w+-\w+,\s*/, '').replace(/-\d+/, '')
-  return new Date(cleanDate)
+function onFiltersUpdate(newFilters: typeof store.filters) {
+  Object.assign(store.filters, newFilters)
+  store.fetchGroupHikes()
+  syncUrl()
 }
 
-const filteredHikes = computed(() => {
-  let hikes = [...groupHikes]
-
-  // Search
-  if (searchQuery.value.trim()) {
-    const query = searchQuery.value.toLowerCase()
-    hikes = hikes.filter(
-      (hike) =>
-        hike.title.toLowerCase().includes(query) ||
-        hike.organization.toLowerCase().includes(query) ||
-        hike.trail.toLowerCase().includes(query) ||
-        hike.description.toLowerCase().includes(query),
-    )
-  }
-
-  // Filter by difficulty
-  if (activeFilter.value !== 'All') {
-    hikes = hikes.filter((hike) => hike.difficulty === activeFilter.value)
-  }
-
-  // Sort
-  switch (activeSort.value) {
-    case 'date':
-      hikes.sort((a, b) => parseDate(a.date).getTime() - parseDate(b.date).getTime())
-      break
-    case 'price-low':
-      hikes.sort((a, b) => a.price - b.price)
-      break
-    case 'price-high':
-      hikes.sort((a, b) => b.price - a.price)
-      break
-  }
-
-  return hikes
-})
+function syncUrl() {
+  // store.syncFiltersToUrl is called internally by setFilter; we trigger via store
+  store.setFilter('page', 1)
+}
 </script>
 
 <template>
-  <section class="group-hikes-section">
-    <div class="section-container">
-      <div class="section-header">
-        <h2>Upcoming Group Hikes</h2>
-        <p>Join organized hikes led by experienced guides from trusted organizations</p>
+  <section class="browse-page">
+    <div class="page-container">
+      <!-- Header -->
+      <div class="page-header">
+        <h1>Upcoming Group Hikes</h1>
+        <p>Discover and join organized hikes led by trusted guides and hiking clubs across Kenya</p>
       </div>
 
-      <div class="search-bar">
-        <input
-          v-model="searchQuery"
-          type="text"
-          placeholder="Search by name, organization, or location..."
-          class="search-input"
-        />
-      </div>
-
-      <div class="controls">
-        <div class="filters">
-          <span class="control-label">Difficulty:</span>
-          <button
-            v-for="filter in difficultyFilters"
-            :key="filter"
-            :class="['filter-btn', { active: activeFilter === filter }]"
-            @click="activeFilter = filter"
-          >
-            {{ filter }}
-          </button>
-        </div>
-
-        <div class="sort">
-          <label for="sort-select" class="control-label">Sort by:</label>
-          <select id="sort-select" v-model="activeSort" class="sort-select">
-            <option v-for="option in sortOptions" :key="option.value" :value="option.value">
-              {{ option.label }}
-            </option>
-          </select>
+      <!-- Featured strip -->
+      <div v-if="store.featuredHikes.length" class="hikes-strip">
+        <h2 class="strip-title">Featured</h2>
+        <div class="strip-scroll">
+          <GroupHikeCard
+            v-for="hike in store.featuredHikes"
+            :key="hike.id"
+            :hike="hike"
+            :featured="true"
+            class="strip-card"
+          />
         </div>
       </div>
 
-      <div class="hikes-grid">
-        <GroupHikeCard v-for="hike in filteredHikes" :key="hike.id" :hike="hike" />
+      <!-- This Week strip -->
+      <div v-if="store.thisWeekHikes.length" class="hikes-strip">
+        <h2 class="strip-title">This Week</h2>
+        <div class="strip-scroll">
+          <GroupHikeCard
+            v-for="hike in store.thisWeekHikes"
+            :key="hike.id"
+            :hike="hike"
+            class="strip-card"
+          />
+        </div>
       </div>
 
-      <p v-if="filteredHikes.length === 0" class="no-results">
-        No hikes found. Try adjusting your search or filters.
-      </p>
+      <!-- Divider -->
+      <div v-if="store.featuredHikes.length || store.thisWeekHikes.length" class="section-divider">
+        <h2 class="strip-title">All Upcoming Hikes</h2>
+      </div>
+
+      <!-- Filters -->
+      <GroupHikeFilters
+        v-model="store.filters"
+        @update:model-value="onFiltersUpdate"
+        @reset="store.resetFilters()"
+      />
+
+      <!-- Loading skeletons -->
+      <div v-if="store.isLoading && store.groupHikes.length === 0" class="hikes-grid">
+        <div v-for="n in 6" :key="n" class="skeleton-card">
+          <div class="skeleton skeleton-img"></div>
+          <div class="skeleton-body">
+            <div class="skeleton skeleton-line skeleton-line--short"></div>
+            <div class="skeleton skeleton-line"></div>
+            <div class="skeleton skeleton-line skeleton-line--medium"></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Grid -->
+      <div v-else-if="store.groupHikes.length" class="hikes-grid">
+        <GroupHikeCard v-for="hike in store.groupHikes" :key="hike.id" :hike="hike" />
+      </div>
+
+      <!-- Empty state -->
+      <div v-else-if="!store.isLoading" class="empty-state">
+        <div class="empty-icon">🥾</div>
+        <p v-if="store.hasActiveFilters" class="empty-title">No hikes match your filters</p>
+        <p v-else class="empty-title">No upcoming hikes at the moment</p>
+        <p class="empty-sub">{{ store.hasActiveFilters ? 'Try adjusting or clearing your filters.' : 'Check back soon for new hikes!' }}</p>
+        <button v-if="store.hasActiveFilters" class="clear-btn" @click="store.resetFilters()">
+          Clear filters
+        </button>
+      </div>
+
+      <!-- Error state -->
+      <div v-if="store.error" class="error-state">
+        <p>{{ store.error }}</p>
+        <button class="retry-btn" @click="store.fetchGroupHikes()">Retry</button>
+      </div>
+
+      <!-- Load more -->
+      <div v-if="store.hasMore && !store.isLoading && store.groupHikes.length" class="load-more">
+        <button class="load-more-btn" :disabled="store.isLoading" @click="store.loadMore()">
+          {{ store.isLoading ? 'Loading...' : 'Load More Hikes' }}
+        </button>
+        <p class="load-more-count">
+          Showing {{ store.groupHikes.length }} of {{ store.pagination.total }} hikes
+        </p>
+      </div>
     </div>
   </section>
 </template>
 
 <style scoped>
-.group-hikes-section {
+.browse-page {
   background: var(--color-bg-secondary);
-  padding: var(--space-16) var(--space-5);
   min-height: 100%;
+  padding: var(--space-10) var(--space-5) var(--space-16);
   box-sizing: border-box;
 }
 
-.section-container {
+.page-container {
   max-width: 1200px;
   margin: 0 auto;
 }
 
-.section-header {
+.page-header {
   text-align: center;
   margin-bottom: var(--space-10);
 }
 
-.section-header h2 {
+.page-header h1 {
   font-size: var(--text-3xl);
   font-weight: var(--font-bold);
   color: var(--color-gray-800);
@@ -231,139 +146,222 @@ const filteredHikes = computed(() => {
   line-height: var(--leading-tight);
 }
 
-.section-header p {
+.page-header p {
   font-size: var(--text-base);
   color: var(--color-gray-500);
   margin: 0;
-  line-height: var(--leading-normal);
+  max-width: 560px;
+  margin: 0 auto;
 }
 
-.search-bar {
-  margin-bottom: var(--space-6);
+/* Strips */
+.hikes-strip {
+  margin-bottom: var(--space-8);
 }
 
-.search-input {
-  width: 100%;
-  padding: var(--space-3) var(--space-5);
-  border: 2px solid var(--color-gray-200);
+.strip-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-bold);
+  color: var(--color-gray-800);
+  margin: 0 0 var(--space-4) 0;
+}
+
+.strip-scroll {
+  display: flex;
+  gap: var(--space-5);
+  overflow-x: auto;
+  padding-bottom: var(--space-3);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gray-300) transparent;
+}
+
+.strip-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.strip-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-gray-300);
+  border-radius: var(--radius-full);
+}
+
+.strip-card {
+  flex: 0 0 320px;
+}
+
+.section-divider {
+  margin-bottom: var(--space-4);
+  padding-top: var(--space-4);
+  border-top: 1px solid var(--color-gray-200);
+}
+
+/* Grid */
+.hikes-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: var(--space-6);
+}
+
+/* Skeleton */
+.skeleton-card {
   background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--color-gray-100) 25%, var(--color-gray-50) 50%, var(--color-gray-100) 75%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+  border-radius: var(--radius-sm);
+}
+
+@keyframes shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.skeleton-img {
+  aspect-ratio: 16 / 9;
+  border-radius: 0;
+}
+
+.skeleton-body {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.skeleton-line {
+  height: 14px;
+  width: 100%;
+}
+
+.skeleton-line--short {
+  width: 40%;
+}
+
+.skeleton-line--medium {
+  width: 65%;
+}
+
+/* Empty / Error */
+.empty-state {
+  text-align: center;
+  padding: var(--space-16) 0;
+}
+
+.empty-icon {
+  font-size: 48px;
+  margin-bottom: var(--space-4);
+}
+
+.empty-title {
+  font-size: var(--text-lg);
+  font-weight: var(--font-semibold);
+  color: var(--color-gray-700);
+  margin: 0 0 var(--space-2) 0;
+}
+
+.empty-sub {
+  font-size: var(--text-sm);
+  color: var(--color-gray-400);
+  margin: 0 0 var(--space-6) 0;
+}
+
+.clear-btn {
+  padding: var(--space-2) var(--space-6);
+  border: 1px solid var(--color-danger);
+  color: var(--color-danger);
+  background: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  cursor: pointer;
+}
+
+.clear-btn:hover {
+  background: rgba(239, 68, 68, 0.05);
+}
+
+.error-state {
+  text-align: center;
+  padding: var(--space-8) 0;
+  color: var(--color-danger);
+}
+
+.retry-btn {
+  margin-top: var(--space-3);
+  padding: var(--space-2) var(--space-5);
+  background: var(--color-primary);
+  color: white;
+  border: none;
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+/* Load more */
+.load-more {
+  margin-top: var(--space-10);
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.load-more-btn {
+  padding: var(--space-3) var(--space-8);
+  border: 2px solid var(--color-primary);
+  color: var(--color-primary);
+  background: none;
   border-radius: var(--radius-md);
   font-size: var(--text-base);
-  color: var(--color-gray-800);
-  transition: border-color var(--duration-fast) var(--ease-out),
-    box-shadow var(--duration-fast) var(--ease-out);
-  box-sizing: border-box;
-}
-
-.search-input::placeholder {
-  color: var(--color-gray-400);
-}
-
-.search-input:hover {
-  border-color: var(--color-gray-300);
-}
-
-.search-input:focus {
-  border-color: var(--color-primary);
-  outline: none;
-  box-shadow: 0 0 0 3px var(--color-primary-light);
-}
-
-.controls {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  gap: var(--space-6);
-  margin-bottom: var(--space-8);
-  flex-wrap: wrap;
-}
-
-.filters {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  flex-wrap: wrap;
-}
-
-.control-label {
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
-  color: var(--color-gray-600);
-}
-
-.sort {
-  display: flex;
-  align-items: center;
-  gap: var(--space-3);
-}
-
-.sort-select {
-  padding: var(--space-2) var(--space-4);
-  border: 2px solid var(--color-gray-200);
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
-  color: var(--color-gray-600);
+  font-weight: var(--font-semibold);
   cursor: pointer;
-  transition: border-color var(--duration-fast) var(--ease-out);
+  transition: background var(--duration-fast) var(--ease-out), color var(--duration-fast) var(--ease-out);
 }
 
-.sort-select:hover,
-.sort-select:focus {
-  border-color: var(--color-primary);
-  outline: none;
-}
-
-.filter-btn {
-  padding: var(--space-2) var(--space-5);
-  border: 2px solid var(--color-gray-200);
-  background: var(--color-bg-primary);
-  border-radius: var(--radius-md);
-  font-size: var(--text-sm);
-  font-weight: var(--font-medium);
-  color: var(--color-gray-600);
-  cursor: pointer;
-  transition: border-color var(--duration-fast) var(--ease-out),
-    color var(--duration-fast) var(--ease-out),
-    background var(--duration-fast) var(--ease-out);
-}
-
-.filter-btn:hover {
-  border-color: var(--color-primary);
-  color: var(--color-primary);
-}
-
-.filter-btn.active {
+.load-more-btn:hover:not(:disabled) {
   background: var(--color-primary);
-  border-color: var(--color-primary);
   color: white;
 }
 
-.no-results {
-  text-align: center;
-  color: var(--color-gray-500);
-  font-size: var(--text-base);
-  padding: var(--space-10) 0;
+.load-more-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }
 
-.hikes-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-  gap: var(--space-6);
+.load-more-count {
+  font-size: var(--text-sm);
+  color: var(--color-gray-400);
+  margin: 0;
 }
 
-@media (max-width: 768px) {
-  .group-hikes-section {
-    padding: var(--space-10) var(--space-4);
+/* Responsive */
+@media (max-width: 1024px) {
+  .hikes-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 640px) {
+  .browse-page {
+    padding: var(--space-6) var(--space-4) var(--space-10);
   }
 
-  .section-header h2 {
+  .page-header h1 {
     font-size: var(--text-2xl);
   }
 
   .hikes-grid {
     grid-template-columns: 1fr;
+  }
+
+  .strip-card {
+    flex: 0 0 280px;
   }
 }
 </style>

@@ -5,11 +5,14 @@ import maplibregl from 'maplibre-gl'
 import 'maplibre-gl/dist/maplibre-gl.css'
 import { useTrailStore } from '@/stores/trailStore'
 import { getDifficultyColor, formatDuration } from '@/services/trailService'
+import { getHikesByTrail } from '@/services/groupHikeService'
 import SeasonIndicator from '@/components/trails/SeasonIndicator.vue'
 import MultiDayBadge from '@/components/trails/MultiDayBadge.vue'
 import MonthCalendar from '@/components/trails/MonthCalendar.vue'
 import RequirementsCard from '@/components/trails/RequirementsCard.vue'
 import ItineraryTimeline from '@/components/trails/ItineraryTimeline.vue'
+import GroupHikeCard from '@/components/GroupHikeCard.vue'
+import type { PublicGroupHikeCard } from '@/types/groupHike'
 
 const route = useRoute()
 const router = useRouter()
@@ -18,6 +21,9 @@ const store = useTrailStore()
 const miniMapContainer = ref<HTMLElement | null>(null)
 let miniMap: maplibregl.Map | null = null
 let marker: maplibregl.Marker | null = null
+
+const trailGroupHikes = ref<PublicGroupHikeCard[]>([])
+const groupHikesLoading = ref(false)
 
 function initMiniMap() {
   if (!miniMapContainer.value || !store.currentTrail) return
@@ -42,6 +48,22 @@ watch(
     if (id) store.loadTrail(id as string)
   },
   { immediate: true },
+)
+
+// Fetch group hikes for this trail when trail slug is known
+watch(
+  () => store.currentTrail,
+  async (trail) => {
+    if (!trail) return
+    groupHikesLoading.value = true
+    try {
+      trailGroupHikes.value = await getHikesByTrail(trail.slug)
+    } catch {
+      trailGroupHikes.value = []
+    } finally {
+      groupHikesLoading.value = false
+    }
+  },
 )
 
 // Init mini map when container available and trail loaded
@@ -187,13 +209,36 @@ onUnmounted(() => {
       <div ref="miniMapContainer" class="mini-map"></div>
     </section>
 
-    <!-- Group hikes CTA -->
-    <section class="cta-section">
-      <h2>Want to hike with a group?</h2>
-      <p>Browse upcoming guided hikes on this trail and others across Kenya.</p>
-      <router-link :to="{ name: 'group-hikes' }" class="cta-btn">
-        View Group Hikes
-      </router-link>
+    <!-- Upcoming Group Hikes for this trail -->
+    <section class="content-section group-hikes-section">
+      <div class="section-header-row">
+        <h2>Upcoming Group Hikes</h2>
+        <router-link :to="{ name: 'group-hikes' }" class="see-all-link">See all →</router-link>
+      </div>
+
+      <div v-if="groupHikesLoading" class="hikes-scroll">
+        <div v-for="n in 3" :key="n" class="hike-skeleton">
+          <div class="skeleton-img skeleton"></div>
+          <div class="skeleton-body">
+            <div class="skeleton skeleton-line"></div>
+            <div class="skeleton skeleton-line skeleton-line--short"></div>
+          </div>
+        </div>
+      </div>
+
+      <div v-else-if="trailGroupHikes.length" class="hikes-scroll">
+        <GroupHikeCard
+          v-for="hike in trailGroupHikes"
+          :key="hike.id"
+          :hike="hike"
+          class="hike-scroll-card"
+        />
+      </div>
+
+      <div v-else class="no-hikes">
+        <p>No upcoming group hikes for this trail.</p>
+        <router-link :to="{ name: 'group-hikes' }" class="cta-btn">Browse All Hikes</router-link>
+      </div>
     </section>
   </div>
 </template>
@@ -490,5 +535,105 @@ onUnmounted(() => {
   .stat {
     flex: 0 0 100%;
   }
+}
+
+/* Group hikes section */
+.group-hikes-section {
+  border-top: 1px solid var(--color-gray-200);
+  padding-top: var(--space-6);
+}
+
+.section-header-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-5);
+}
+
+.section-header-row h2 {
+  margin: 0;
+}
+
+.see-all-link {
+  font-size: var(--text-sm);
+  color: var(--color-primary);
+  text-decoration: none;
+  font-weight: var(--font-medium);
+}
+
+.see-all-link:hover {
+  text-decoration: underline;
+}
+
+.hikes-scroll {
+  display: flex;
+  gap: var(--space-4);
+  overflow-x: auto;
+  padding-bottom: var(--space-3);
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-gray-300) transparent;
+}
+
+.hikes-scroll::-webkit-scrollbar {
+  height: 4px;
+}
+
+.hikes-scroll::-webkit-scrollbar-thumb {
+  background: var(--color-gray-300);
+  border-radius: var(--radius-full);
+}
+
+.hike-scroll-card {
+  flex: 0 0 300px;
+}
+
+.hike-skeleton {
+  flex: 0 0 280px;
+  background: var(--color-bg-primary);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-sm);
+}
+
+.skeleton {
+  background: linear-gradient(90deg, var(--color-gray-100) 25%, var(--color-gray-50) 50%, var(--color-gray-100) 75%);
+  background-size: 400% 100%;
+  animation: shimmer 1.4s ease infinite;
+}
+
+@keyframes shimmer {
+  0% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+.skeleton-img {
+  height: 160px;
+}
+
+.skeleton-body {
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+.skeleton-line {
+  height: 13px;
+  border-radius: var(--radius-sm);
+}
+
+.skeleton-line--short {
+  width: 55%;
+}
+
+.no-hikes {
+  text-align: center;
+  padding: var(--space-8) 0;
+  color: var(--color-gray-500);
+}
+
+.no-hikes p {
+  margin: 0 0 var(--space-4) 0;
+  font-size: var(--text-sm);
 }
 </style>

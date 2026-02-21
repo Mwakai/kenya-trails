@@ -20,6 +20,11 @@ const router = createRouter({
       name: 'trail-detail',
       component: () => import('@/components/TrailDetailPage.vue'),
     },
+    {
+      path: '/group-hikes/:slug',
+      name: 'group-hike-detail',
+      component: () => import('@/components/GroupHikeDetailPage.vue'),
+    },
   ],
 })
 
