@@ -15,7 +15,20 @@ const router = createRouter({
       name: 'group-hikes',
       component: GroupHikesSection,
     },
+    {
+      path: '/trail/:id',
+      name: 'trail-detail',
+      component: () => import('@/components/TrailDetailPage.vue'),
+    },
   ],
+})
+
+// Scroll .main-content to top on navigation (scrollBehavior doesn't work with overflow: auto on main)
+router.afterEach(() => {
+  const main = document.querySelector('.main-content')
+  if (main) {
+    main.scrollTop = 0
+  }
 })
 
 export default router

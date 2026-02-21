@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { getDifficultyColor } from '@/services/trailService'
+
 export interface GroupHike {
   id: number
   organization: string
@@ -18,15 +20,6 @@ export interface GroupHike {
 defineProps<{
   hike: GroupHike
 }>()
-
-const getDifficultyColor = (difficulty: string): string => {
-  const colors: Record<string, string> = {
-    Easy: '#10b981',
-    Moderate: '#f59e0b',
-    Hard: '#ef4444',
-  }
-  return colors[difficulty] || '#6b7280'
-}
 
 const formatPrice = (price: number): string => {
   if (price === 0) return 'Free'
