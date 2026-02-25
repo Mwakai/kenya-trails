@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { onMounted } from 'vue'
-import { useRoute } from 'vue-router'
+import { RouterLink, useRoute } from 'vue-router'
 import { useGroupHikeStore } from '@/stores/groupHikeStore'
 import GroupHikeCard from '@/components/GroupHikeCard.vue'
 import GroupHikeFilters from '@/components/group-hikes/GroupHikeFilters.vue'
@@ -27,6 +27,23 @@ function syncUrl() {
 
 <template>
   <section class="browse-page">
+    <!-- Sticky top bar -->
+    <header class="page-topbar">
+      <RouterLink to="/" class="back-btn">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        <span>Explore Map</span>
+      </RouterLink>
+      <div class="topbar-brand">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M3 18 L8 7 L12 13 L15 9 L21 18 Z" />
+          <path d="M3 18 H21" />
+        </svg>
+        <span>Kenya Trails</span>
+      </div>
+    </header>
+
     <div class="page-container">
       <!-- Header -->
       <div class="page-header">
@@ -124,13 +141,72 @@ function syncUrl() {
 .browse-page {
   background: var(--color-bg-secondary);
   min-height: 100%;
-  padding: var(--space-10) var(--space-5) var(--space-16);
   box-sizing: border-box;
+}
+
+/* ── Sticky topbar ───────────────────────────────── */
+.page-topbar {
+  position: sticky;
+  top: 0;
+  z-index: 50;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 var(--space-5);
+  height: 52px;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border-bottom: 1px solid var(--color-gray-200);
+  box-shadow: 0 1px 8px rgba(0, 0, 0, 0.06);
+}
+
+.back-btn {
+  display: flex;
+  align-items: center;
+  gap: var(--space-1);
+  text-decoration: none;
+  color: var(--color-gray-600);
+  font-size: var(--text-sm);
+  font-weight: var(--font-medium);
+  padding: 6px var(--space-3) 6px var(--space-2);
+  border-radius: var(--radius-full);
+  transition: background-color 0.15s ease, color 0.15s ease;
+}
+
+.back-btn svg {
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+}
+
+.back-btn:hover {
+  background: var(--color-gray-100);
+  color: var(--color-gray-900);
+}
+
+.topbar-brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: var(--color-gray-700);
+  font-size: var(--text-sm);
+  font-weight: var(--font-bold);
+  letter-spacing: -0.01em;
+  user-select: none;
+}
+
+.topbar-brand svg {
+  width: 18px;
+  height: 18px;
+  color: var(--color-primary);
+  flex-shrink: 0;
 }
 
 .page-container {
   max-width: 1200px;
   margin: 0 auto;
+  padding: var(--space-10) var(--space-6) var(--space-16);
 }
 
 .page-header {
@@ -348,7 +424,7 @@ function syncUrl() {
 }
 
 @media (max-width: 640px) {
-  .browse-page {
+  .page-container {
     padding: var(--space-6) var(--space-4) var(--space-10);
   }
 
