@@ -1,21 +1,3 @@
-<template>
-  <div class="popup-wrapper">
-    <div v-if="trail.image_url" class="popup-image">
-      <img :src="trail.image_url" :alt="trail.name" />
-    </div>
-    <div class="popup-body">
-      <div class="popup-name">{{ trail.name }}</div>
-      <div class="popup-region">{{ trail.region.name }}</div>
-      <div class="popup-meta">
-        <span class="popup-difficulty" :style="{ background: diffColor }">{{ trail.difficulty }}</span>
-        <span class="popup-stat">{{ trail.distance_km }} km</span>
-        <span class="popup-stat">{{ duration }}</span>
-      </div>
-      <button class="popup-btn" @click="onViewDetail(trail.slug)">View Details</button>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { computed } from 'vue'
 import type { TrailMapMarker } from '@/types/trail'
@@ -29,6 +11,26 @@ const props = defineProps<{
 const diffColor = computed(() => getDifficultyColor(props.trail.difficulty))
 const duration = computed(() => formatDuration(props.trail.duration))
 </script>
+
+<template>
+  <div class="popup-wrapper">
+    <div v-if="trail.image_url" class="popup-image">
+      <img :src="trail.image_url" :alt="trail.name" />
+    </div>
+    <div class="popup-body">
+      <div class="popup-name">{{ trail.name }}</div>
+      <div class="popup-region">{{ trail.region.name }}</div>
+      <div class="popup-meta">
+        <span class="popup-difficulty" :style="{ background: diffColor }">{{
+          trail.difficulty
+        }}</span>
+        <span class="popup-stat">{{ trail.distance_km }} km</span>
+        <span class="popup-stat">{{ duration }}</span>
+      </div>
+      <button class="popup-btn" @click="onViewDetail(trail.slug)">View Details</button>
+    </div>
+  </div>
+</template>
 
 <style scoped>
 .popup-wrapper {

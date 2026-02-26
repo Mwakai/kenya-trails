@@ -1,34 +1,3 @@
-<template>
-  <div class="map-page">
-    <div class="map-container">
-      <div ref="mapContainer" class="map"></div>
-      <div v-if="store.loading" class="map-loading">Loading trails...</div>
-      <div v-if="store.error" class="map-error">{{ store.error }}</div>
-      <TrailFilters />
-
-      <!-- Brand chip -->
-      <div class="map-brand">
-        <svg class="brand-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M3 18 L8 7 L12 13 L15 9 L21 18 Z" />
-          <path d="M3 18 H21" />
-        </svg>
-        <span>Kenya Trails</span>
-      </div>
-
-      <!-- Group Hikes FAB -->
-      <RouterLink to="/group-hikes" class="map-fab">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
-          <circle cx="9" cy="7" r="4" />
-          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
-          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
-        </svg>
-        <span>Group Hikes</span>
-      </RouterLink>
-    </div>
-  </div>
-</template>
-
 <script setup lang="ts">
 import { ref, onMounted, onUnmounted, watch, createApp } from 'vue'
 import type { App } from 'vue'
@@ -208,6 +177,54 @@ onUnmounted(() => {
 })
 </script>
 
+<template>
+  <div class="map-page">
+    <div class="map-container">
+      <div ref="mapContainer" class="map"></div>
+      <div v-if="store.loading" class="map-loading">Loading trails...</div>
+      <div v-if="store.error" class="map-error">{{ store.error }}</div>
+      <TrailFilters />
+
+      <!-- Brand chip -->
+      <div class="map-brand">
+        <svg
+          class="brand-icon"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M3 18 L8 7 L12 13 L15 9 L21 18 Z" />
+          <path d="M3 18 H21" />
+        </svg>
+        <span>Kenya Trails</span>
+      </div>
+
+      <!-- Group Hikes FAB -->
+      <RouterLink to="/group-hikes" class="map-fab">
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+          <circle cx="9" cy="7" r="4" />
+          <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+          <path d="M16 3.13a4 4 0 0 1 0 7.75" />
+        </svg>
+        <span>Group Hikes</span>
+      </RouterLink>
+    </div>
+  </div>
+</template>
+
 <style scoped>
 .map-page {
   height: 100%;
@@ -286,13 +303,26 @@ onUnmounted(() => {
 
 /* ── Group Hikes FAB ────────────────────────────── */
 @keyframes fab-enter {
-  from { opacity: 0; transform: translateY(12px) scale(0.92); }
-  to   { opacity: 1; transform: translateY(0)    scale(1); }
+  from {
+    opacity: 0;
+    transform: translateY(12px) scale(0.92);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @keyframes fab-pulse {
-  0%, 100% { box-shadow: 0 4px 20px rgba(16, 185, 129, 0.45); }
-  50%       { box-shadow: 0 4px 28px rgba(16, 185, 129, 0.75), 0 0 0 8px rgba(16, 185, 129, 0.12); }
+  0%,
+  100% {
+    box-shadow: 0 4px 20px rgba(16, 185, 129, 0.45);
+  }
+  50% {
+    box-shadow:
+      0 4px 28px rgba(16, 185, 129, 0.75),
+      0 0 0 8px rgba(16, 185, 129, 0.12);
+  }
 }
 
 .map-fab {
