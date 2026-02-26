@@ -8,7 +8,7 @@ const props = defineProps<{
 
 const emit = defineEmits<{ 'update:modelValue': [value: string] }>()
 
-const selected = computed(() => props.modelValue ? props.modelValue.split(',') : [])
+const selected = computed(() => (props.modelValue ? props.modelValue.split(',') : []))
 
 function toggle(slug: string) {
   const next = selected.value.includes(slug)
@@ -28,7 +28,6 @@ function toggle(slug: string) {
         @change="toggle(region.slug)"
       />
       <span class="region-name">{{ region.name }}</span>
-      <span class="region-count">{{ region.trails_count }}</span>
     </label>
   </div>
 </template>

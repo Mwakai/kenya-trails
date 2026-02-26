@@ -60,7 +60,7 @@ const open = ref(false)
             :key="level.value"
             :value="level.value"
           >
-            {{ level.label }} ({{ level.trails_count }})
+            {{ level.label }}
           </option>
         </select>
       </div>
@@ -85,7 +85,11 @@ const open = ref(false)
     </div>
 
     <!-- Toggle button -->
-    <button class="panel-toggle" :title="open ? 'Close filters' : 'Open filters'" @click="open = !open">
+    <button
+      class="panel-toggle"
+      :title="open ? 'Close filters' : 'Open filters'"
+      @click="open = !open"
+    >
       <svg
         class="chevron"
         :class="{ 'chevron--open': open }"

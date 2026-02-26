@@ -66,6 +66,18 @@ function addTrailMarkers() {
 
 watch(() => store.trails, addTrailMarkers)
 
+watch(
+  () => store.filters,
+  (filters) => {
+    const query: Record<string, string> = {}
+    Object.entries(filters).forEach(([key, value]) => {
+      if (value) query[key] = value
+    })
+    router.replace({ query })
+  },
+  { deep: true },
+)
+
 onMounted(async () => {
   if (!mapContainer.value) return
 

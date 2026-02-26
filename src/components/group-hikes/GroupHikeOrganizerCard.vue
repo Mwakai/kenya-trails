@@ -24,7 +24,8 @@ defineProps<{ hike: PublicGroupHike }>()
         <div class="org-name-row">
           <span class="org-name">{{ hike.company?.name ?? hike.organizer_name }}</span>
           <span v-if="hike.company?.is_verified" class="verified-badge">
-            ✓ Verified
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+            Verified
           </span>
         </div>
       </div>
@@ -100,11 +101,20 @@ defineProps<{ hike: PublicGroupHike }>()
 }
 
 .verified-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 3px;
   background: rgba(16, 185, 129, 0.1);
   color: var(--color-primary);
   font-size: var(--text-xs);
   font-weight: var(--font-bold);
   padding: 2px 8px;
   border-radius: var(--radius-full);
+}
+
+.verified-badge svg {
+  width: 11px;
+  height: 11px;
+  flex-shrink: 0;
 }
 </style>

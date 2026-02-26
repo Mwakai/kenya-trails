@@ -116,7 +116,8 @@ onUnmounted(() => {
     >
       <div v-if="store.currentTrail.image_url" class="hero-overlay"></div>
       <button class="hero-back" @click="router.back()">
-        &larr; Back
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+        Back
       </button>
       <div class="hero-content">
         <div class="hero-badges">
@@ -213,7 +214,9 @@ onUnmounted(() => {
     <section class="content-section group-hikes-section">
       <div class="section-header-row">
         <h2>Upcoming Group Hikes</h2>
-        <router-link :to="{ name: 'group-hikes' }" class="see-all-link">See all →</router-link>
+        <router-link :to="{ name: 'group-hikes' }" class="see-all-link">
+          See all <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+        </router-link>
       </div>
 
       <div v-if="groupHikesLoading" class="hikes-scroll">
@@ -328,6 +331,15 @@ onUnmounted(() => {
   cursor: pointer;
   z-index: 1;
   transition: background var(--duration-fast) var(--ease-out);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.hero-back svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
 .hero-back:hover {
@@ -559,6 +571,15 @@ onUnmounted(() => {
   color: var(--color-primary);
   text-decoration: none;
   font-weight: var(--font-medium);
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.see-all-link svg {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
 }
 
 .see-all-link:hover {

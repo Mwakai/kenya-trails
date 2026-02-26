@@ -29,7 +29,7 @@ onMounted(async () => {
     <div class="similar-header">
       <h2 class="similar-title">More Hikes in {{ hike.region.name }}</h2>
       <RouterLink :to="{ name: 'group-hikes', query: { region: hike.region.slug } }" class="see-all">
-        See all →
+        See all <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
       </RouterLink>
     </div>
     <div class="similar-scroll">

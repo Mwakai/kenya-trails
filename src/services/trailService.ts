@@ -53,8 +53,6 @@ export async function fetchMapTrails(filters?: Partial<TrailFilters>): Promise<T
     if (filters.search) params.search = filters.search
     if (filters.region) params.region = filters.region
     if (filters.difficulty) params.difficulty = filters.difficulty
-    if (filters.distance_max) params.distance_max = filters.distance_max
-    if (filters.duration_max) params.duration_max = filters.duration_max
   }
   const data = await apiFetch<{ trails: unknown[] }>('/api/public/trails', params)
   const rawTrails = Array.isArray(data) ? data : data.trails ?? []

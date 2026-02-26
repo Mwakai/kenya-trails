@@ -68,7 +68,9 @@ const fallbackGradient = 'linear-gradient(135deg, #064e3b 0%, #10b981 60%, #6ee7
           />
           <div v-else class="org-avatar">{{ organizerInitial }}</div>
           <span class="org-name">{{ organizerName }}</span>
-          <span v-if="hike.company?.is_verified" class="verified-check" title="Verified organizer">✓</span>
+          <span v-if="hike.company?.is_verified" class="verified-check" title="Verified organizer">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><polyline points="20 6 9 17 4 12"/></svg>
+          </span>
         </div>
         <span
           class="difficulty-badge"
@@ -262,9 +264,14 @@ const fallbackGradient = 'linear-gradient(135deg, #064e3b 0%, #10b981 60%, #6ee7
 
 .verified-check {
   color: var(--color-primary);
-  font-size: var(--text-sm);
-  font-weight: var(--font-bold);
   flex-shrink: 0;
+  display: inline-flex;
+  align-items: center;
+}
+
+.verified-check svg {
+  width: 14px;
+  height: 14px;
 }
 
 .difficulty-badge {

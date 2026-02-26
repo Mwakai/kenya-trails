@@ -109,7 +109,9 @@ function syncUrl() {
 
       <!-- Empty state -->
       <div v-else-if="!store.isLoading" class="empty-state">
-        <div class="empty-icon">🥾</div>
+        <div class="empty-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><polygon points="16.24 7.76 14.12 14.12 7.76 16.24 9.88 9.88 16.24 7.76"/></svg>
+        </div>
         <p v-if="store.hasActiveFilters" class="empty-title">No hikes match your filters</p>
         <p v-else class="empty-title">No upcoming hikes at the moment</p>
         <p class="empty-sub">{{ store.hasActiveFilters ? 'Try adjusting or clearing your filters.' : 'Check back soon for new hikes!' }}</p>
@@ -329,8 +331,15 @@ function syncUrl() {
 }
 
 .empty-icon {
-  font-size: 48px;
-  margin-bottom: var(--space-4);
+  width: 48px;
+  height: 48px;
+  margin: 0 auto var(--space-4);
+  color: var(--color-gray-400);
+}
+
+.empty-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .empty-title {

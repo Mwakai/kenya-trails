@@ -1,6 +1,5 @@
 import { ref, computed } from 'vue'
 import { defineStore } from 'pinia'
-import { useRouter, useRoute } from 'vue-router'
 import type { TrailMapMarker, Trail, FilterOptions, TrailFilters, Region } from '@/types/trail'
 import { fetchMapTrails, fetchTrail as fetchTrailApi, fetchFilterOptions, fetchRegions } from '@/services/trailService'
 
@@ -31,8 +30,23 @@ export const useTrailStore = defineStore('trail', () => {
     loading.value = true
     error.value = null
     try {
-      const result = await fetchMapTrails(filters.value)
-      trails.value = Array.isArray(result) ? result : []
+      let result = await fetchMapTrails(filters.value)
+      if (!Array.isArray(result)) result = []
+
+      if (filters.value.distance_max) {
+        const max = parseFloat(filters.value.distance_max)
+        result = result.filter((t) => t.distance_km <= max)
+      }
+
+      if (filters.value.duration_max) {
+        const maxHours = parseFloat(filters.value.duration_max)
+        result = result.filter((t) => {
+          const hours = t.duration.type === 'days' ? t.duration.min * 24 : t.duration.min
+          return hours <= maxHours
+        })
+      }
+
+      trails.value = result
     } catch (e) {
       error.value = e instanceof Error ? e.message : 'Failed to load trails'
       trails.value = []
@@ -73,30 +87,12 @@ export const useTrailStore = defineStore('trail', () => {
 
   function setFilter(key: keyof TrailFilters, value: string) {
     filters.value[key] = value
-    syncFiltersToUrl()
     loadTrails()
   }
 
   function clearFilters() {
     filters.value = defaultFilters()
-    syncFiltersToUrl()
     loadTrails()
-  }
-
-  function syncFiltersToUrl() {
-    try {
-      const router = useRouter()
-      const route = useRoute()
-      if (route.name !== 'map') return
-
-      const query: Record<string, string> = {}
-      Object.entries(filters.value).forEach(([key, value]) => {
-        if (value) query[key] = value
-      })
-      router.replace({ query })
-    } catch {
-      // Router not available (e.g., during SSR or outside component setup)
-    }
   }
 
   function syncFiltersFromUrl(query: Record<string, string>) {

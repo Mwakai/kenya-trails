@@ -38,12 +38,15 @@ watch(
     <!-- Error / Not Found -->
     <div v-else-if="store.error || (!store.currentHike && !store.isLoading)" class="error-page">
       <div class="error-content">
-        <p class="error-icon">🏔️</p>
+        <div class="error-icon">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m8 3 4 8 5-5 5 15H2L8 3z"/></svg>
+        </div>
         <h2>{{ store.error ? 'Something went wrong' : 'Hike not found' }}</h2>
         <p class="error-sub">{{ store.error ?? 'This group hike does not exist or may have been removed.' }}</p>
         <div class="error-actions">
           <RouterLink :to="{ name: 'group-hikes' }" class="back-btn">
-            ← Back to Group Hikes
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+            Back to Group Hikes
           </RouterLink>
           <button v-if="store.error" class="retry-btn" @click="store.fetchGroupHike(route.params.slug as string)">
             Retry
@@ -57,7 +60,8 @@ watch(
       <!-- Back nav -->
       <div class="back-nav">
         <button class="back-link" @click="router.back()">
-          ← Back
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+          Back
         </button>
         <RouterLink :to="{ name: 'group-hikes' }" class="all-link">
           All Group Hikes
@@ -143,6 +147,15 @@ watch(
   color: var(--color-gray-500);
   cursor: pointer;
   padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.back-link svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
 .back-link:hover {
@@ -232,8 +245,15 @@ watch(
 }
 
 .error-icon {
-  font-size: 64px;
+  width: 64px;
+  height: 64px;
   margin: 0 0 var(--space-4) 0;
+  color: var(--color-gray-300);
+}
+
+.error-icon svg {
+  width: 100%;
+  height: 100%;
 }
 
 .error-content h2 {
@@ -264,6 +284,15 @@ watch(
   text-decoration: none;
   font-size: var(--text-sm);
   font-weight: var(--font-semibold);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.back-btn svg {
+  width: 16px;
+  height: 16px;
+  flex-shrink: 0;
 }
 
 .retry-btn {
