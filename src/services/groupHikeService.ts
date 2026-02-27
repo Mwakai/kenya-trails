@@ -41,12 +41,16 @@ function transformHike(raw: Record<string, unknown>): PublicGroupHikeCard {
       ? `${currency} ${price.toLocaleString()}`
       : 'Free'
 
-  const hasFeaturedImage = raw.featured_image_thumbnail || raw.featured_image_medium
+  const rawImg = raw.featured_image as { thumbnail?: string; medium?: string; large?: string; url?: string } | null
+  const thumbUrl = (rawImg?.thumbnail) || (raw.featured_image_thumbnail as string) || ''
+  const mediumUrl = (rawImg?.medium) || (raw.featured_image_medium as string) || ''
+  const largeUrl = (rawImg?.large) || (rawImg?.url) || mediumUrl || thumbUrl || ''
+  const hasFeaturedImage = thumbUrl || mediumUrl || largeUrl
   const featuredImage = hasFeaturedImage
     ? {
-        thumbnail: (raw.featured_image_thumbnail as string) || (raw.featured_image_medium as string) || '',
-        medium: (raw.featured_image_medium as string) || (raw.featured_image_thumbnail as string) || '',
-        large: (raw.featured_image_medium as string) || '',
+        thumbnail: thumbUrl || mediumUrl,
+        medium: mediumUrl || thumbUrl,
+        large: largeUrl,
       }
     : null
 
@@ -193,7 +197,16 @@ function transformFullHike(raw: Record<string, unknown>): PublicGroupHike {
         }
       : { name: null, email: null, phone: null, whatsapp: null }
 
-  base.gallery = Array.isArray(raw.gallery) ? (raw.gallery as PublicGroupHike['gallery']) : []
+  const rawImages = Array.isArray(raw.images) ? (raw.images as Record<string, unknown>[]) : []
+  base.gallery = rawImages.map((img) => ({
+    id: img.id as number,
+    urls: {
+      thumbnail: (img.thumbnail as string) || (img.url as string) || '',
+      medium: (img.medium as string) || (img.url as string) || '',
+      large: (img.url as string) || (img.medium as string) || '',
+    },
+    caption: (img.caption as string | null) ?? null,
+  }))
 
   return base
 }
