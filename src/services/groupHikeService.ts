@@ -19,14 +19,102 @@ async function apiFetch<T>(path: string, params?: Record<string, string>): Promi
   return json.data ?? json
 }
 
-function extractList(data: unknown): PublicGroupHikeCard[] {
-  if (Array.isArray(data)) return data as PublicGroupHikeCard[]
-  if (data && typeof data === 'object') {
-    const d = data as Record<string, unknown>
-    if (Array.isArray(d.group_hikes)) return d.group_hikes as PublicGroupHikeCard[]
-    if (Array.isArray(d.data)) return d.data as PublicGroupHikeCard[]
+// Transforms flat API response to the nested PublicGroupHikeCard shape.
+// If the item already has the nested shape (has a `dates` object), it is returned as-is.
+function transformHike(raw: Record<string, unknown>): PublicGroupHikeCard {
+  if (raw.dates && typeof raw.dates === 'object') {
+    return raw as unknown as PublicGroupHikeCard
   }
-  return []
+
+  const isFree = Boolean(raw.is_free)
+  const price = raw.price != null ? parseFloat(raw.price as string) : null
+  const currency = (raw.price_currency as string) || 'KES'
+  const startDate = (raw.start_date as string) || ''
+  const endDate = (raw.end_date as string | null) ?? null
+  const startTime = (raw.start_time as string) || ''
+  const spotsRemaining = raw.spots_remaining as number | null ?? null
+  const maxParticipants = raw.max_participants as number | null ?? null
+
+  const priceFormatted = isFree
+    ? 'Free'
+    : price != null
+      ? `${currency} ${price.toLocaleString()}`
+      : 'Free'
+
+  const hasFeaturedImage = raw.featured_image_thumbnail || raw.featured_image_medium
+  const featuredImage = hasFeaturedImage
+    ? {
+        thumbnail: (raw.featured_image_thumbnail as string) || (raw.featured_image_medium as string) || '',
+        medium: (raw.featured_image_medium as string) || (raw.featured_image_thumbnail as string) || '',
+        large: (raw.featured_image_medium as string) || '',
+      }
+    : null
+
+  const rawRegion = raw.region as { slug: string; name: string } | null
+  const region =
+    rawRegion && typeof rawRegion === 'object'
+      ? rawRegion
+      : { slug: '', name: '' }
+
+  return {
+    id: raw.id as number,
+    slug: raw.slug as string,
+    title: raw.title as string,
+    short_description: (raw.short_description as string | null) ?? null,
+    organizer_name: (raw.organizer_name as string | null) ?? null,
+    company: (raw.company as PublicGroupHikeCard['company']) ?? null,
+    trail: null,
+    location: {
+      name: (raw.custom_location_name as string) || '',
+      latitude: 0,
+      longitude: 0,
+    },
+    region,
+    dates: {
+      start_date: startDate,
+      start_time: startTime,
+      end_date: endDate,
+      end_time: null,
+      is_multi_day: Boolean(raw.is_multi_day),
+    },
+    date_display: startDate,
+    time_display: startTime ? startTime.slice(0, 5) : '',
+    datetime_formatted: `${startDate} ${startTime}`,
+    capacity: {
+      max_participants: maxParticipants,
+      spots_remaining: spotsRemaining,
+      is_full: maxParticipants != null && spotsRemaining === 0,
+    },
+    pricing: {
+      price,
+      currency,
+      formatted: priceFormatted,
+      notes: null,
+      is_free: isFree,
+    },
+    difficulty: (raw.difficulty as string) || '',
+    difficulty_label: (raw.difficulty as string) || '',
+    featured_image: featuredImage,
+    is_featured: Boolean(raw.is_featured),
+    is_recurring: Boolean(raw.is_recurring),
+    status: raw.is_cancelled ? 'cancelled' : 'published',
+    is_cancelled: Boolean(raw.is_cancelled),
+  }
+}
+
+function extractList(data: unknown): PublicGroupHikeCard[] {
+  let items: unknown[]
+  if (Array.isArray(data)) {
+    items = data
+  } else if (data && typeof data === 'object') {
+    const d = data as Record<string, unknown>
+    if (Array.isArray(d.group_hikes)) items = d.group_hikes
+    else if (Array.isArray(d.data)) items = d.data
+    else items = []
+  } else {
+    items = []
+  }
+  return items.map((item) => transformHike(item as Record<string, unknown>))
 }
 
 export async function listGroupHikes(
@@ -50,11 +138,14 @@ export async function listGroupHikes(
   // Handle { group_hikes: [], meta: {} } or { data: [], meta: {} } or PaginatedResponse directly
   if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
     const d = raw as Record<string, unknown>
-    const items = Array.isArray(d.group_hikes)
-      ? (d.group_hikes as PublicGroupHikeCard[])
+    const rawItems: unknown[] = Array.isArray(d.group_hikes)
+      ? d.group_hikes
       : Array.isArray(d.data)
-        ? (d.data as PublicGroupHikeCard[])
-        : extractList(raw)
+        ? d.data
+        : []
+    const items = rawItems.length > 0
+      ? rawItems.map((item) => transformHike(item as Record<string, unknown>))
+      : extractList(raw)
     const meta = (d.meta as PaginatedResponse<PublicGroupHikeCard>['meta']) ?? {
       current_page: 1,
       last_page: 1,
@@ -71,13 +162,50 @@ export async function listGroupHikes(
   }
 }
 
+function transformFullHike(raw: Record<string, unknown>): PublicGroupHike {
+  const base = transformHike(raw) as PublicGroupHike
+
+  base.description = (raw.description as string) || ''
+  base.meeting_point = (raw.meeting_point as string | null) ?? null
+  base.recurring_notes = (raw.recurring_notes as string | null) ?? null
+  base.cancellation_reason = (raw.cancellation_reason as string | null) ?? null
+
+  const rawReg = raw.registration as Record<string, unknown> | null
+  base.registration =
+    rawReg && typeof rawReg === 'object'
+      ? {
+          url: (rawReg.url as string | null) ?? null,
+          deadline: (rawReg.deadline as string | null) ?? null,
+          deadline_display: (rawReg.deadline_display as string | null) ?? null,
+          notes: (rawReg.notes as string | null) ?? null,
+          is_open: Boolean(rawReg.is_open),
+        }
+      : { url: null, deadline: null, deadline_display: null, notes: null, is_open: false }
+
+  const rawContact = raw.contact as Record<string, unknown> | null
+  base.contact =
+    rawContact && typeof rawContact === 'object'
+      ? {
+          name: (rawContact.name as string | null) ?? null,
+          email: (rawContact.email as string | null) ?? null,
+          phone: (rawContact.phone as string | null) ?? null,
+          whatsapp: (rawContact.whatsapp as string | null) ?? null,
+        }
+      : { name: null, email: null, phone: null, whatsapp: null }
+
+  base.gallery = Array.isArray(raw.gallery) ? (raw.gallery as PublicGroupHike['gallery']) : []
+
+  return base
+}
+
 export async function getGroupHike(slug: string): Promise<PublicGroupHike> {
   const raw = await apiFetch<unknown>(`/api/public/group-hikes/${slug}`)
   if (raw && typeof raw === 'object' && !Array.isArray(raw)) {
     const d = raw as Record<string, unknown>
-    if (d.group_hike) return d.group_hike as PublicGroupHike
+    const item = d.group_hike ?? raw
+    return transformFullHike(item as Record<string, unknown>)
   }
-  return raw as PublicGroupHike
+  return transformFullHike(raw as Record<string, unknown>)
 }
 
 export async function getFeaturedHikes(limit?: number): Promise<PublicGroupHikeCard[]> {
