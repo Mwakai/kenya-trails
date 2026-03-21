@@ -16,6 +16,7 @@ const mapContainer = ref<HTMLElement | null>(null)
 let map: maplibregl.Map | null = null
 let markers: maplibregl.Marker[] = []
 let popupApps: App[] = []
+let activePopup: maplibregl.Popup | null = null
 
 function createPopupElement(trail: TrailMapMarker): HTMLElement {
   const container = document.createElement('div')
@@ -33,6 +34,7 @@ function clearMarkers() {
   markers = []
   popupApps.forEach((app) => app.unmount())
   popupApps = []
+  activePopup = null
 }
 
 function addTrailMarkers() {
@@ -50,10 +52,21 @@ function addTrailMarkers() {
 
     const popup = new maplibregl.Popup({
       offset: 25,
-      closeButton: true,
-      closeOnClick: false,
+      closeButton: false,
+      closeOnClick: true,
       maxWidth: '300px',
     }).setDOMContent(createPopupElement(trail))
+
+    popup.on('open', () => {
+      if (activePopup && activePopup !== popup) {
+        activePopup.remove()
+      }
+      activePopup = popup
+    })
+
+    popup.on('close', () => {
+      if (activePopup === popup) activePopup = null
+    })
 
     const marker = new maplibregl.Marker(el)
       .setLngLat(trail.coordinates)
@@ -278,6 +291,9 @@ onUnmounted(() => {
   box-shadow: var(--shadow-md);
   font-size: var(--text-sm);
   z-index: 10;
+}
+.maplibregl-marker {
+  cursor: pointer;
 }
 
 /* ── Brand chip ─────────────────────────────────── */

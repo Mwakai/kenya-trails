@@ -13,7 +13,7 @@ const duration = computed(() => formatDuration(props.trail.duration))
 </script>
 
 <template>
-  <div class="popup-wrapper">
+  <div class="popup-wrapper" @click="onViewDetail(trail.slug)">
     <div v-if="trail.image_url" class="popup-image">
       <img :src="trail.image_url" :alt="trail.name" />
     </div>
@@ -27,7 +27,7 @@ const duration = computed(() => formatDuration(props.trail.duration))
         <span class="popup-stat">{{ trail.distance_km }} km</span>
         <span class="popup-stat">{{ duration }}</span>
       </div>
-      <button class="popup-btn" @click="onViewDetail(trail.slug)">View Details</button>
+      <!-- <button class="popup-btn" @click="onViewDetail(trail.slug)">View Details</button> -->
     </div>
   </div>
 </template>
@@ -39,6 +39,7 @@ const duration = computed(() => formatDuration(props.trail.duration))
   height: 120px;
   width: 280px;
   overflow: hidden;
+  cursor: pointer;
 }
 
 .popup-image {

@@ -67,12 +67,9 @@ watch(
 )
 
 // Init mini map when container available and trail loaded
-watch(
-  [miniMapContainer, () => store.currentTrail],
-  ([el, trail]) => {
-    if (el && trail && !miniMap) initMiniMap()
-  },
-)
+watch([miniMapContainer, () => store.currentTrail], ([el, trail]) => {
+  if (el && trail && !miniMap) initMiniMap()
+})
 
 // Update mini map when trail changes (if already initialized)
 watch(
@@ -112,11 +109,27 @@ onUnmounted(() => {
     <!-- Hero section -->
     <section
       class="hero"
-      :style="{ background: store.currentTrail.image_url ? `url(${store.currentTrail.image_url}) center/cover no-repeat` : store.currentTrail.imageGradient }"
+      :style="{
+        background: store.currentTrail.image_url
+          ? `url(${store.currentTrail.image_url}) center/cover no-repeat`
+          : store.currentTrail.imageGradient,
+      }"
     >
       <div v-if="store.currentTrail.image_url" class="hero-overlay"></div>
       <button class="hero-back" @click="router.back()">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M19 12H5"/><path d="m12 19-7-7 7-7"/></svg>
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          aria-hidden="true"
+        >
+          <path d="M19 12H5" />
+          <path d="m12 19-7-7 7-7" />
+        </svg>
         Back
       </button>
       <div class="hero-content">
@@ -175,9 +188,7 @@ onUnmounted(() => {
     <!-- Best Time to Visit -->
     <section v-if="store.currentTrail.season" class="content-section">
       <h2>Best Time to Visit</h2>
-      <MonthCalendar
-        :best-months="store.currentTrail.season.best_months"
-      />
+      <MonthCalendar :best-months="store.currentTrail.season.best_months" />
       <div class="season-info">
         <p v-if="store.currentTrail.season.recommendation" class="season-recommendation">
           {{ store.currentTrail.season.recommendation }}
@@ -198,7 +209,10 @@ onUnmounted(() => {
     </section>
 
     <!-- Day-by-Day Itinerary -->
-    <section v-if="store.currentTrail.itinerary && store.currentTrail.itinerary.length > 0" class="content-section">
+    <section
+      v-if="store.currentTrail.itinerary && store.currentTrail.itinerary.length > 0"
+      class="content-section"
+    >
       <h2>Day-by-Day Itinerary</h2>
       <ItineraryTimeline :itinerary="store.currentTrail.itinerary" />
     </section>
@@ -215,7 +229,20 @@ onUnmounted(() => {
       <div class="section-header-row">
         <h2>Upcoming Group Hikes</h2>
         <router-link :to="{ name: 'group-hikes' }" class="see-all-link">
-          See all <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>
+          See all
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+            aria-hidden="true"
+          >
+            <path d="M5 12h14" />
+            <path d="m12 5 7 7-7 7" />
+          </svg>
         </router-link>
       </div>
 
@@ -617,14 +644,23 @@ onUnmounted(() => {
 }
 
 .skeleton {
-  background: linear-gradient(90deg, var(--color-gray-100) 25%, var(--color-gray-50) 50%, var(--color-gray-100) 75%);
+  background: linear-gradient(
+    90deg,
+    var(--color-gray-100) 25%,
+    var(--color-gray-50) 50%,
+    var(--color-gray-100) 75%
+  );
   background-size: 400% 100%;
   animation: shimmer 1.4s ease infinite;
 }
 
 @keyframes shimmer {
-  0% { background-position: 100% 50%; }
-  100% { background-position: 0% 50%; }
+  0% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
 }
 
 .skeleton-img {
