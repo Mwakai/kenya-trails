@@ -1,6 +1,6 @@
 import type { TrailMapMarker, Trail, FilterOptions, TrailFilters, Duration } from '@/types/trail'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 async function apiFetch<T>(path: string, params?: Record<string, string>): Promise<T> {
   const url = new URL(`${BASE_URL}${path}`)
@@ -55,7 +55,7 @@ export async function fetchMapTrails(filters?: Partial<TrailFilters>): Promise<T
     if (filters.difficulty) params.difficulty = filters.difficulty
   }
   const data = await apiFetch<{ trails: unknown[] }>('/api/public/trails', params)
-  const rawTrails = Array.isArray(data) ? data : data.trails ?? []
+  const rawTrails = Array.isArray(data) ? data : (data.trails ?? [])
   return rawTrails.map(transformTrail)
 }
 
@@ -88,8 +88,7 @@ export async function fetchTrail(idOrSlug: string | number): Promise<Trail> {
           }
         : null,
     itinerary: raw.itinerary_days?.length ? raw.itinerary_days : null,
-    imageGradient:
-      'linear-gradient(135deg, #1e3a5f 0%, #4a90d9 50%, #87ceeb 100%)',
+    imageGradient: 'linear-gradient(135deg, #1e3a5f 0%, #4a90d9 50%, #87ceeb 100%)',
   }
 }
 
@@ -100,7 +99,12 @@ export async function fetchFilterOptions(): Promise<FilterOptions> {
 export async function fetchRegions(): Promise<FilterOptions['regions']> {
   const data = await apiFetch<unknown>('/api/public/trails/regions')
   if (Array.isArray(data)) return data as FilterOptions['regions']
-  if (data && typeof data === 'object' && 'regions' in data && Array.isArray((data as Record<string, unknown>).regions)) {
+  if (
+    data &&
+    typeof data === 'object' &&
+    'regions' in data &&
+    Array.isArray((data as Record<string, unknown>).regions)
+  ) {
     return (data as Record<string, unknown>).regions as FilterOptions['regions']
   }
   return []

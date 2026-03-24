@@ -1,6 +1,11 @@
-import type { PublicGroupHike, PublicGroupHikeCard, GroupHikeFilters, PaginatedResponse } from '@/types/groupHike'
+import type {
+  PublicGroupHike,
+  PublicGroupHikeCard,
+  GroupHikeFilters,
+  PaginatedResponse,
+} from '@/types/groupHike'
 
-const BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'
+const BASE_URL = import.meta.env.VITE_API_BASE_URL
 
 async function apiFetch<T>(path: string, params?: Record<string, string>): Promise<T> {
   const url = new URL(`${BASE_URL}${path}`)
@@ -32,8 +37,8 @@ function transformHike(raw: Record<string, unknown>): PublicGroupHikeCard {
   const startDate = (raw.start_date as string) || ''
   const endDate = (raw.end_date as string | null) ?? null
   const startTime = (raw.start_time as string) || ''
-  const spotsRemaining = raw.spots_remaining as number | null ?? null
-  const maxParticipants = raw.max_participants as number | null ?? null
+  const spotsRemaining = (raw.spots_remaining as number | null) ?? null
+  const maxParticipants = (raw.max_participants as number | null) ?? null
 
   const priceFormatted = isFree
     ? 'Free'
@@ -41,10 +46,15 @@ function transformHike(raw: Record<string, unknown>): PublicGroupHikeCard {
       ? `${currency} ${price.toLocaleString()}`
       : 'Free'
 
-  const rawImg = raw.featured_image as { thumbnail?: string; medium?: string; large?: string; url?: string } | null
-  const thumbUrl = (rawImg?.thumbnail) || (raw.featured_image_thumbnail as string) || ''
-  const mediumUrl = (rawImg?.medium) || (raw.featured_image_medium as string) || ''
-  const largeUrl = (rawImg?.large) || (rawImg?.url) || mediumUrl || thumbUrl || ''
+  const rawImg = raw.featured_image as {
+    thumbnail?: string
+    medium?: string
+    large?: string
+    url?: string
+  } | null
+  const thumbUrl = rawImg?.thumbnail || (raw.featured_image_thumbnail as string) || ''
+  const mediumUrl = rawImg?.medium || (raw.featured_image_medium as string) || ''
+  const largeUrl = rawImg?.large || rawImg?.url || mediumUrl || thumbUrl || ''
   const hasFeaturedImage = thumbUrl || mediumUrl || largeUrl
   const featuredImage = hasFeaturedImage
     ? {
@@ -55,10 +65,7 @@ function transformHike(raw: Record<string, unknown>): PublicGroupHikeCard {
     : null
 
   const rawRegion = raw.region as { slug: string; name: string } | null
-  const region =
-    rawRegion && typeof rawRegion === 'object'
-      ? rawRegion
-      : { slug: '', name: '' }
+  const region = rawRegion && typeof rawRegion === 'object' ? rawRegion : { slug: '', name: '' }
 
   return {
     id: raw.id as number,
@@ -147,9 +154,10 @@ export async function listGroupHikes(
       : Array.isArray(d.data)
         ? d.data
         : []
-    const items = rawItems.length > 0
-      ? rawItems.map((item) => transformHike(item as Record<string, unknown>))
-      : extractList(raw)
+    const items =
+      rawItems.length > 0
+        ? rawItems.map((item) => transformHike(item as Record<string, unknown>))
+        : extractList(raw)
     const meta = (d.meta as PaginatedResponse<PublicGroupHikeCard>['meta']) ?? {
       current_page: 1,
       last_page: 1,
